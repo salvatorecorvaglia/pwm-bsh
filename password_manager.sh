@@ -12,7 +12,7 @@ store_password() {
     read service
     echo "Enter the password for $service:"
     read -s password
-    echo "$service:$password" | openssl enc -aes-256-cbc -salt -pass pass:"$MASTER_PASSWORD" -out "$PASSWORD_FILE"
+    echo "$service:$password" | openssl enc -aes-256-cbc -salt -pass pass:"$MASTER_PASSWORD" >> "$PASSWORD_FILE"
     echo "Password for $service stored securely!"
 }
 
@@ -31,6 +31,11 @@ retrieve_password() {
 
 # Function to list all stored services
 list_passwords() {
+    if [ ! -f "$PASSWORD_FILE" ] || [ ! -s "$PASSWORD_FILE" ]; then
+        echo "No stored passwords found."
+        return
+    fi
+
     echo "Stored passwords for the following services:"
     openssl enc -aes-256-cbc -d -in "$PASSWORD_FILE" -pass pass:"$MASTER_PASSWORD" 2>/dev/null | cut -d: -f1
 }
@@ -65,4 +70,3 @@ case $choice in
         exit 1
         ;;
 esac
-
